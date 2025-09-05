@@ -331,7 +331,19 @@ document.addEventListener('DOMContentLoaded', () => {
     // Event listeners
     themeToggle.addEventListener('click', toggleTheme);
     hamburger.addEventListener('click', toggleMobileNav);
-    contactForm.addEventListener('submit', handleContactForm);
+    contactForm.addEventListener('submit', (e) => {
+        // basic validation then allow native submit to FormSubmit
+        const name = document.getElementById('name').value.trim();
+        const email = document.getElementById('email').value.trim();
+        const subject = document.getElementById('subject').value.trim();
+        const message = document.getElementById('message').value.trim();
+        if (!name || !email || !subject || !message || !isValidEmail(email)) {
+            e.preventDefault();
+            showNotification('Please fill in all fields with a valid email.', 'error');
+            return;
+        }
+        // Let the form submit to FormSubmit.co
+    });
     
     // Navigation links
     navLinks.forEach(link => {

@@ -360,6 +360,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
     
+    // Force download handler for links with class 'force-download'
+    document.querySelectorAll('a.force-download').forEach((linkEl) => {
+        linkEl.addEventListener('click', async (e) => {
+            // Let native download attribute try first in modern browsers
+            // If the host enforces inline (like GitHub Pages for some content), fall back to fetch
+            e.preventDefault();
+            const fileUrl = linkEl.getAttribute('href');
+            try {
+                const response = await fetch(fileUrl, { cache: 'no-store' });
+                if (!response.ok) throw new Error('Network response was not ok');
+                const blob = await response.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                // infer filename from URL
+                const urlParts = fileUrl.split('/');
+                a.download = urlParts[urlParts.length - 1] || 'download';
+                document.body.appendChild(a);
+                a.click();
+                a.remove();
+                URL.revokeObjectURL(url);
+            } catch (err) {
+                // As a last resort, open in new tab (user can download manually)
+                window.open(fileUrl, '_blank', 'noopener,noreferrer');
+            }
+        });
+    });
+
     // Smooth reveal animation for sections
     const sections = document.querySelectorAll('section');
     const revealObserver = new IntersectionObserver((entries) => {
